@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { FaCalendarCheck } from "@react-icons/all-files/fa/FaCalendarCheck";
 import { FaMoneyBillWave } from "@react-icons/all-files/fa/FaMoneyBillWave";
@@ -17,6 +16,7 @@ import { FaPlus } from "@react-icons/all-files/fa/FaPlus";
 import { FaCog } from "@react-icons/all-files/fa/FaCog";
 import { FaSearch } from "@react-icons/all-files/fa/FaSearch";
 import { defaultRooms } from "../components/pensiune/RoomsSection";
+import RoomManagement, { AdminRoom } from "./RoomManagement";
 
 interface Booking {
    id: string;
@@ -39,8 +39,8 @@ const initialBookings: Booking[] = [
       phone: "0745 112 233",
       email: "mihai.ionescu@gmail.com",
       roomTitle: "Suita Panoramică Deluxe",
-      checkIn: "2024-09-18",
-      checkOut: "2024-09-21",
+      checkIn: "2026-09-18",
+      checkOut: "2026-09-21",
       guests: 2,
       totalPrice: 1050,
       status: "Confirmată",
@@ -52,8 +52,8 @@ const initialBookings: Booking[] = [
       phone: "0722 998 877",
       email: "elena.d@yahoo.com",
       roomTitle: "Camera Dublă Tradițională",
-      checkIn: "2024-09-19",
-      checkOut: "2024-09-22",
+      checkIn: "2026-09-19",
+      checkOut: "2026-09-22",
       guests: 2,
       totalPrice: 780,
       status: "În așteptare",
@@ -65,8 +65,8 @@ const initialBookings: Booking[] = [
       phone: "0730 445 566",
       email: "radu.stan@outlook.com",
       roomTitle: "Apartament Familial cu 2 Camere",
-      checkIn: "2024-09-25",
-      checkOut: "2024-09-28",
+      checkIn: "2026-09-25",
+      checkOut: "2026-09-28",
       guests: 4,
       totalPrice: 1470,
       status: "Confirmată",
@@ -78,8 +78,8 @@ const initialBookings: Booking[] = [
       phone: "0751 332 211",
       email: "alin.v@gmail.com",
       roomTitle: "Căsuța din Lemn (Chalet Separat)",
-      checkIn: "2024-10-02",
-      checkOut: "2024-10-05",
+      checkIn: "2026-10-02",
+      checkOut: "2026-10-05",
       guests: 2,
       totalPrice: 1950,
       status: "Confirmată",
@@ -91,8 +91,8 @@ const initialBookings: Booking[] = [
       phone: "0766 887 744",
       email: "cosmin.popa@gmail.com",
       roomTitle: "Suita Panoramică Deluxe",
-      checkIn: "2024-09-10",
-      checkOut: "2024-09-12",
+      checkIn: "2026-09-10",
+      checkOut: "2026-09-12",
       guests: 2,
       totalPrice: 700,
       status: "Anulată",
@@ -107,7 +107,7 @@ const AdminDashboard = () => {
    const [filterStatus, setFilterStatus] = useState<string>("Toate");
 
    // Rooms state with prices
-   const [rooms, setRooms] = useState(
+   const [rooms, setRooms] = useState<AdminRoom[]>(
       defaultRooms.map((r) => ({
          ...r,
          isAvailable: true,
@@ -119,11 +119,11 @@ const AdminDashboard = () => {
    const [newBooking, setNewBooking] = useState({
       guestName: "",
       phone: "",
-      roomTitle: defaultRooms[0].title,
+      roomTitle: defaultRooms[0]?.title || "",
       checkIn: "",
       checkOut: "",
       guests: 2,
-      totalPrice: defaultRooms[0].price * 2,
+      totalPrice: (defaultRooms[0]?.price || 0) * 2,
    });
 
    // Handle confirm / cancel
@@ -153,14 +153,6 @@ const AdminDashboard = () => {
       setBookings([created, ...bookings]);
       setShowNewBookingModal(false);
       toast.success("Rezervare adăugată cu succes!");
-   };
-
-   // Toggle room availability
-   const toggleRoomAvailability = (id: string) => {
-      setRooms((prev) =>
-         prev.map((r) => (r.id === id ? { ...r, isAvailable: !r.isAvailable } : r))
-      );
-      toast.success("Disponibilitatea camerei a fost actualizată!");
    };
 
    // Filtered bookings
@@ -564,70 +556,7 @@ const AdminDashboard = () => {
 
             {/* ROOMS TAB */}
             {activeTab === "rooms" && (
-               <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6 space-y-6">
-                  <div className="flex items-center justify-between">
-                     <div>
-                        <h2 className="text-xl font-bold text-neutral-900">Gestiune Camere & Tarife</h2>
-                        <p className="text-xs text-neutral-500">
-                           Setează tarifele pe noapte și disponibilitatea camerelor pe site
-                        </p>
-                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     {rooms.map((room) => (
-                        <div
-                           key={room.id}
-                           className="border border-neutral-200 rounded-2xl p-5 flex flex-col justify-between hover:border-neutral-300 transition"
-                        >
-                           <div className="flex gap-4">
-                              <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
-                                 <Image
-                                    src={room.imageSrc}
-                                    alt={room.title}
-                                    fill
-                                    className="object-cover"
-                                 />
-                              </div>
-                              <div className="flex-1">
-                                 <div className="flex items-center justify-between">
-                                    <h3 className="font-bold text-neutral-900 text-base">
-                                       {room.title}
-                                    </h3>
-                                    <span
-                                       className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                                          room.isAvailable
-                                             ? "bg-emerald-100 text-emerald-700"
-                                             : "bg-rose-100 text-rose-700"
-                                        }`}
-                                    >
-                                       {room.isAvailable ? "Disponibilă" : "Blocată"}
-                                    </span>
-                                 </div>
-                                 <div className="text-xs text-neutral-500 mt-1">
-                                    {room.capacity} • {room.beds} • {room.surface}
-                                 </div>
-                                 <div className="mt-3 flex items-center justify-between">
-                                    <div className="text-lg font-extrabold text-neutral-900">
-                                       {room.price} lei <span className="text-xs font-normal text-neutral-500">/ noapte</span>
-                                    </div>
-                                    <button
-                                       onClick={() => toggleRoomAvailability(room.id)}
-                                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                                          room.isAvailable
-                                             ? "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-                                             : "bg-emerald-500 text-white hover:bg-emerald-600"
-                                       }`}
-                                    >
-                                       {room.isAvailable ? "Blochează temporar" : "Activează camera"}
-                                    </button>
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </div>
+               <RoomManagement rooms={rooms} setRooms={setRooms} bookings={bookings} />
             )}
 
             {/* SETTINGS TAB */}
@@ -769,7 +698,7 @@ const AdminDashboard = () => {
                            }
                            className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-rose-500 bg-white"
                         >
-                           {defaultRooms.map((r) => (
+                           {rooms.map((r) => (
                               <option key={r.id} value={r.title}>
                                  {r.title} ({r.price} lei/noapte)
                               </option>
